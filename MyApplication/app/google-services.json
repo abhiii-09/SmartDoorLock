@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "679566497085",
+    "project_id": "smart-door-lock-1f825",
+    "storage_bucket": "smart-door-lock-1f825.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:679566497085:android:0bda4f936dec1bbb4ba154",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "679566497085-q5j34autl1mqo55662df1fumr2de10tn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDPx6rbOzEBm63JySkox_OAjRB38HSa7C8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "679566497085-q5j34autl1mqo55662df1fumr2de10tn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
