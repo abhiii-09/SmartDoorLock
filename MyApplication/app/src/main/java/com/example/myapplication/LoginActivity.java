@@ -1,15 +1,27 @@
 package com.example.myapplication;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -17,11 +29,21 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 
 public class LoginActivity extends AppCompatActivity {
     Button btn_lregister, btn_llogin, btn_ladmin;
     EditText et_lpassword, et_lpno;
+    double long_address;
+    double lat_address;
+    double destination_latitute = 18.632590699999998;
+    double destination_longitude = 73.79767749999999;
+    FusedLocationProviderClient fusedLocationProviderClient;
     DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("users");
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference myRef = database.getReference();
@@ -32,6 +54,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         et_lpassword = (EditText) findViewById(R.id.et_lpassword);
         et_lpno = (EditText) findViewById(R.id.et_lpno);
@@ -56,66 +79,116 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        if (ActivityCompat.checkSelfPermission(LoginActivity.this,
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            getLocation();
+        } else {
+            ActivityCompat.requestPermissions(LoginActivity.this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 44);
+        }
 
         btn_llogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String password = et_lpassword.getText().toString();
-                String phone = et_lpno.getText().toString();
+                if(lat_address <= (destination_latitute + 0.002) && lat_address >=
+                        (destination_latitute - 0.002) && long_address <= (destination_longitude + 0.002) &&
+                        long_address >= (destination_longitude - 0.002)) {
 
-                Query checkUser = ref.orderByChild("phone").equalTo(phone);
+                    String password = et_lpassword.getText().toString();
+                    String phone = et_lpno.getText().toString();
 
-                checkUser.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
+                    Query checkUser = ref.orderByChild("phone").equalTo(phone);
 
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    checkUser.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
 
-                        if (dataSnapshot.exists()) {
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                            et_lpassword.setError(null);
+                            if (dataSnapshot.exists()) {
 
-                            String passwordFromDB = dataSnapshot.child(phone).child("password").getValue(String.class);
+                                et_lpassword.setError(null);
 
-                            if (passwordFromDB.equals(password)) {
-                                String accessFromDB = dataSnapshot.child(phone).child("access").getValue(String.class);
+                                String passwordFromDB = dataSnapshot.child(phone).child("password").getValue(String.class);
 
-                                if (accessFromDB.equals("YES")) {
+                                if (passwordFromDB.equals(password)) {
+                                    String accessFromDB = dataSnapshot.child(phone).child("access").getValue(String.class);
 
-                                    HashMap hashMap = new HashMap();
-                                    hashMap.put("LED_STATUS", "ON");
-                                    myRef.updateChildren(hashMap);
+                                    if (accessFromDB.equals("YES")) {
 
-                                    Intent intent = new Intent(LoginActivity.this, WelcomeHomeActivity.class);
-                                    startActivity(intent);
+                                        HashMap hashMap = new HashMap();
+                                        hashMap.put("LED_STATUS", "ON");
+                                        myRef.updateChildren(hashMap);
+
+                                        Intent intent = new Intent(LoginActivity.this, WelcomeHomeActivity.class);
+                                        startActivity(intent);
 
 
+                                    } else {
+                                        Toast.makeText(getApplicationContext(), "Access Denied", Toast.LENGTH_SHORT).show();
+                                    }
+
+                                } else {
+                                    et_lpassword.setError("Wrong Password");
+                                    et_lpassword.requestFocus();
                                 }
-                                else
-                                {
-                                    Toast.makeText(getApplicationContext(),"Access Denied",Toast.LENGTH_SHORT).show();
-                                }
 
+                            } else {
+                                et_lpno.setError(" No Such phone Number exist");
+                                et_lpno.requestFocus();
                             }
-                            else {
-                                et_lpassword.setError("Wrong Password");
-                                et_lpassword.requestFocus();
-                            }
-
-                        } else {
-                            et_lpno.setError(" No Such phone Number exist");
-                            et_lpno.requestFocus();
                         }
-                    }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
 
-                    }
+                        }
                 });
+
+
+
+                } else{
+                    Toast.makeText(getApplicationContext(), "OUT OF RANGE!", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
 
+    }
+
+    private void getLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        fusedLocationProviderClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
+            @Override
+            public void onComplete(@NonNull @NotNull Task<Location> task) {
+                Location location = task.getResult();
+                if (location != null) {
+                    try {
+                        Geocoder geocoder = new Geocoder(LoginActivity.this,
+                                Locale.getDefault());
+
+                        List<Address> addresses = geocoder.getFromLocation(
+                                location.getLatitude(), location.getLongitude(), 1
+                        );
+                        long_address = addresses.get(0).getLongitude();
+                        lat_address = addresses.get(0).getLatitude();
+                        Log.d("ccc", "onComplete: Longitude = " + long_address);
+                        Log.d("ccc1", "onComplete: Latitude = " + lat_address);
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
             }
 }
 
