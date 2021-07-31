@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -45,6 +46,11 @@ public class WelcomeHomeActivity extends AppCompatActivity {
                 HashMap hashMap = new HashMap();
                 hashMap.put("LED_STATUS", "OFF");
                 myRef.updateChildren(hashMap);
+
+                Intent intent = new Intent(WelcomeHomeActivity.this, MainActivity3.class);
+                startActivity(intent);
+
+                Toast.makeText(getApplicationContext(), "Door Closed", Toast.LENGTH_SHORT).show();
             }
         }, 10000);
 
@@ -56,7 +62,7 @@ public class WelcomeHomeActivity extends AppCompatActivity {
                 hashMap.put("LED_STATUS", "OFF");
                 myRef.updateChildren(hashMap);
 
-                Intent intent = new Intent(WelcomeHomeActivity.this, LoginActivity.class);
+                Intent intent = new Intent(WelcomeHomeActivity.this, MainActivity3.class);
                 startActivity(intent);
             }
         });

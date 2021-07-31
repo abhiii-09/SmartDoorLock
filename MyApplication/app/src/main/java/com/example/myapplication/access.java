@@ -31,11 +31,13 @@ public class access extends AppCompatActivity {
     RadioGroup radioGroup;
     Button saveButton;
     Button backButton;
+    Button password_change;
     String req;
     String str;
     String name;
     String phone;
     String info;
+    String ph_no;
 
     private TextView txtInfo;
     Context context;
@@ -57,16 +59,28 @@ public class access extends AppCompatActivity {
         backButton = (Button) findViewById(R.id.btn_back);
         accept = (RadioButton) findViewById(R.id.radio_accept);
         deny = (RadioButton) findViewById(R.id.radio_deny);
+        password_change = (Button) findViewById(R.id.btn_changepw);
 
 
         Intent intent = getIntent();
         str = intent.getStringExtra("message");
+        ph_no = str;
 
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(access.this, adminPanel.class);
                 startActivity(intent);
+            }
+        });
+
+        password_change.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(access.this, PasswordReset.class);
+                intent.putExtra("message", ph_no);
+                startActivity(intent);
+
             }
         });
 

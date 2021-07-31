@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.myapplication.data.Userhelperlogs;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -32,12 +33,15 @@ import com.google.firebase.database.ValueEventListener;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
 public class LoginActivity extends AppCompatActivity {
-    Button btn_lregister, btn_llogin, btn_ladmin;
+    Button  btn_llogin, back;
     EditText et_lpassword, et_lpno;
     double long_address;
     double lat_address;
@@ -47,6 +51,8 @@ public class LoginActivity extends AppCompatActivity {
     DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("users");
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference myRef = database.getReference();
+    DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+    FirebaseDatabase rootNode;
 
 
     @Override
@@ -59,25 +65,16 @@ public class LoginActivity extends AppCompatActivity {
         et_lpassword = (EditText) findViewById(R.id.et_lpassword);
         et_lpno = (EditText) findViewById(R.id.et_lpno);
         btn_llogin = (Button) findViewById(R.id.btn_llogin);
-        btn_lregister = (Button) findViewById(R.id.btn_lregister);
-        btn_ladmin = (Button) findViewById(R.id.btn_ladmin);
+        back = (Button) findViewById(R.id.back);
 
-
-        btn_lregister.setOnClickListener(new View.OnClickListener() {
+        back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                Intent intent = new Intent(LoginActivity.this, MainActivity3.class);
                 startActivity(intent);
             }
         });
 
-        btn_ladmin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(LoginActivity.this, AdminLogin.class);
-                startActivity(intent);
-            }
-        });
 
         if (ActivityCompat.checkSelfPermission(LoginActivity.this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -90,9 +87,9 @@ public class LoginActivity extends AppCompatActivity {
         btn_llogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(lat_address <= (destination_latitute + 0.002) && lat_address >=
-                        (destination_latitute - 0.002) && long_address <= (destination_longitude + 0.002) &&
-                        long_address >= (destination_longitude - 0.002)) {
+                if(lat_address <= (destination_latitute + 1) && lat_address >=
+                        (destination_latitute - 1) && long_address <= (destination_longitude + 1) &&
+                        long_address >= (destination_longitude - 1)) {
 
                     String password = et_lpassword.getText().toString();
                     String phone = et_lpno.getText().toString();
@@ -118,6 +115,16 @@ public class LoginActivity extends AppCompatActivity {
                                         HashMap hashMap = new HashMap();
                                         hashMap.put("LED_STATUS", "ON");
                                         myRef.updateChildren(hashMap);
+
+                                        rootNode = FirebaseDatabase.getInstance();
+                                        reference = rootNode.getReference("log");
+
+                                        Calendar cal = Calendar.getInstance();
+                                        DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                                        String date_str = df.format(cal.getTime());
+
+                                        Userhelperlogs helperClass = new Userhelperlogs(date_str, phone);
+                                        reference.child(phone).push().setValue(helperClass);
 
                                         Intent intent = new Intent(LoginActivity.this, WelcomeHomeActivity.class);
                                         startActivity(intent);

@@ -3,6 +3,7 @@ package com.example.myapplication;
 import android.content.Context;
 import android.content.Intent;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -15,9 +16,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.myapplication.data.Userhelperlogs;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 
 @RequiresApi(api = Build.VERSION_CODES.M)
@@ -30,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     DatabaseReference reference;
 
     FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference myRef = database.getReference();
+    DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("users");
 
 
     @Override
@@ -52,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         btn_login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                Intent intent = new Intent(MainActivity.this, MainActivity3.class);
                 startActivity(intent);
             }
         });
@@ -60,23 +69,50 @@ public class MainActivity extends AppCompatActivity {
         btn_register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                rootNode = FirebaseDatabase.getInstance();
-                reference = rootNode.getReference("users");
 
                 String name = et_username.getText().toString();
                 String password = et_password.getText().toString();
                 String phone = et_pno.getText().toString();
 
 
-                UserHelperClass helperClass = new UserHelperClass(name, password, phone);
-                reference.child(phone).setValue(helperClass);
-                HashMap hashMap = new HashMap();
-                hashMap.put("access", "NO");
-                reference.child(phone).updateChildren(hashMap);
+                Query checkUser = ref.orderByChild("phone").equalTo(phone);
 
-                Toast.makeText(getApplicationContext(),"Successfully Registered",Toast.LENGTH_SHORT).show();
+                checkUser.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                        if (dataSnapshot.exists()) {
+                            et_pno.setError(" Phone Number already exists");
+                            et_pno.requestFocus();
+                        } else {
+                                rootNode = FirebaseDatabase.getInstance();
+                                reference = rootNode.getReference("users");
+
+
+                                UserHelperClass helperClass = new UserHelperClass(name, password, phone);
+                                reference.child(phone).setValue(helperClass);
+                                HashMap hashMap = new HashMap();
+                                hashMap.put("access", "NO");
+                                reference.child(phone).updateChildren(hashMap);
+
+                                Toast.makeText(getApplicationContext(),"Successfully Registered",Toast.LENGTH_SHORT).show();
+
+                            }
+
+                        }
+
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
 
             }
         });
+    }
+}
 
-    }}
+

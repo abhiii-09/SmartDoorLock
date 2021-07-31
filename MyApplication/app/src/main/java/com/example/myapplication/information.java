@@ -3,6 +3,8 @@ package com.example.myapplication;
 public class information {
     private String name;
     private String phone;
+    private String access;
+    private String password;
 
     public information(){
     }
@@ -28,4 +30,5 @@ public class information {
     public void setName(String name) {
         this.name = name;
     }
+
 }

@@ -3,7 +3,7 @@
     package="com.example.myapplication">
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -12,7 +12,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication">
-        <activity android:name=".access"></activity>
+        <activity android:name=".MainActivity3">
+            android:configChanges="orientation"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".PasswordReset" />
+        <activity android:name=".access" />
         <activity android:name=".listView" />
         <activity android:name=".adminPanel" />
         <activity android:name=".AdminLogin" />
@@ -24,21 +34,11 @@
             android:name=".MainActivity2"
             android:label="@string/title_activity_main2"
             android:theme="@style/Theme.MyApplication.NoActionBar" />
-        <activity
-            android:name=".LoginActivity"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        <activity android:name=".LoginActivity" />
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation"
             android:label="My Application"
-
             android:theme="@style/Theme.MyApplication">
             <intent-filter>
                 <action android:name="com.razormist.simpleregistrationandloginapplication.Login" />
